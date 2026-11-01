@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TruthLens | AI News Detection</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="page-wrapper">
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="brand">
+            <div class="brand-icon">T</div>
+            <span>Truth<span class="brand-highlight">Lens</span></span>
+        </div>
+
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            AI MODEL ACTIVE
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            INTELLIGENT NEWS ANALYSIS
+        </div>
+
+        <h1>Separate Facts from <span>Fiction.</span></h1>
+
+        <p>
+            Analyze news statements using Artificial Intelligence
+            and Machine Learning.
+        </p>
+    </section>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+
+        <!-- Input Card -->
+        <section class="panel input-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <span class="section-label">01 / INPUT</span>
+                    <h2>Analyze a news story</h2>
+                </div>
+
+                <div class="input-icon">✦</div>
+            </div>
+
+            <form method="POST" id="newsForm">
+
+                <label for="news">NEWS STATEMENT</label>
+
+                <textarea
+                    id="news"
+                    name="news"
+                    maxlength="10000"
+                    placeholder="Paste or type a news headline or statement here..."
+                    required>{{ news }}</textarea>
+
+                <div class="input-meta">
+                    <span>Enter the news you want to analyze</span>
+                    <span id="charCount">0 / 10000</span>
+                </div>
+
+                <div class="button-group">
+
+                    <button type="submit" class="analyze-btn" id="analyzeBtn">
+                        <span>Analyze News</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+
+                    <button type="button" class="clear-btn" id="clearBtn">
+                        Clear
+                    </button>
+
+                </div>
+
+            </form>
+
+            <div class="privacy-note">
+                <span>ⓘ</span>
+                Your statement is analyzed by the locally trained ML model.
+            </div>
+
+        </section>
+
+
+        <!-- Result Section -->
+        {% if prediction %}
+
+        <section class="panel result-panel" id="resultPanel">
+
+            <div class="panel-heading">
+                <div>
+                    <span class="section-label">02 / ANALYSIS</span>
+                    <h2>Detection Results</h2>
+                </div>
+
+                <div class="result-badge">ANALYSIS COMPLETE</div>
+            </div>
+
+            <div class="result-main">
+
+                <div class="result-symbol
+                    {% if prediction == 'FAKE' %}fake-symbol{% else %}true-symbol{% endif %}">
+                    {% if prediction == 'FAKE' %}
+                        !
+                    {% else %}
+                        ✓
+                    {% endif %}
+                </div>
+
+                <div class="result-text">
+                    <span>MODEL PREDICTION</span>
+
+                    <h3 class="{% if prediction == 'FAKE' %}fake-text{% else %}true-text{% endif %}">
+                        {{ prediction }} NEWS
+                    </h3>
+
+                    <p>
+                        {% if prediction == 'FAKE' %}
+                            The model identified patterns associated with fake news.
+                        {% else %}
+                            The model identified patterns associated with true news.
+                        {% endif %}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="confidence-heading">
+                <div>
+                    <span class="section-label">MODEL OUTPUT</span>
+                    <h3>Prediction Distribution</h3>
+                </div>
+
+                <span class="distribution-tag">CLASS SCORES</span>
+            </div>
+
+            <!-- Circular Gauges -->
+            <div class="gauge-container">
+
+                <div class="gauge-card true-gauge">
+
+                    <div class="gauge"
+                         data-value="{{ scores['TRUE'] }}"
+                         data-color="#20d9a0">
+
+                        <svg viewBox="0 0 120 120">
+                            <circle class="gauge-track"
+                                    cx="60" cy="60" r="50"></circle>
+
+                            <circle class="gauge-progress"
+                                    cx="60" cy="60" r="50"></circle>
+                        </svg>
+
+                        <div class="gauge-content">
+                            <strong class="gauge-number">{{ scores['TRUE'] }}%</strong>
+                            <span>SCORE</span>
+                        </div>
+
+                    </div>
+
+                    <h4>TRUE</h4>
+                    <p>True news score</p>
+
+                </div>
+
+
+                <div class="gauge-card fake-gauge">
+
+                    <div class="gauge"
+                         data-value="{{ scores['FAKE'] }}"
+                         data-color="#ff647c">
+
+                        <svg viewBox="0 0 120 120">
+                            <circle class="gauge-track"
+                                    cx="60" cy="60" r="50"></circle>
+
+                            <circle class="gauge-progress"
+                                    cx="60" cy="60" r="50"></circle>
+                        </svg>
+
+                        <div class="gauge-content">
+                            <strong class="gauge-number">{{ scores['FAKE'] }}%</strong>
+                            <span>SCORE</span>
+                        </div>
+
+                    </div>
+
+                    <h4>FAKE</h4>
+                    <p>Fake news score</p>
+
+                </div>
+
+            </div>
+
+            <div class="score-explanation">
+                These percentages represent the model's estimated class
+                probabilities. They do not independently verify factual accuracy.
+            </div>
+
+        </section>
+
+        {% else %}
+
+        <section class="panel empty-panel">
+
+            <div class="empty-illustration">◎</div>
+
+            <span class="section-label">AWAITING INPUT</span>
+
+            <h2>Your analysis will appear here</h2>
+
+            <p>
+                Submit a news statement to see the model's prediction
+                and its TRUE/FAKE score distribution.
+            </p>
+
+        </section>
+
+        {% endif %}
+
+    </main>
+
+
+    <!-- How it works -->
+    <section class="how-section">
+
+        <div class="how-heading">
+            <span class="section-label">THE TECHNOLOGY</span>
+            <h2>How the system works</h2>
+        </div>
+
+        <div class="steps-grid">
+
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <h3>Text Preprocessing</h3>
+                <p>NLTK cleans and normalizes the submitted news text.</p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <h3>Feature Extraction</h3>
+                <p>TF-IDF converts text into numerical features.</p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <h3>Classification</h3>
+                <p>Logistic Regression predicts the news category.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-brand">TruthLens</div>
+
+        <p>
+            AI-Based Fake News Detection System
+        </p>
+
+        <p class="disclaimer">
+            This tool identifies patterns learned from labelled datasets.
+            Predictions should not be treated as independent fact verification.
+        </p>
+
+        <span class="copyright">Academic Project • Machine Learning</span>
+    </footer>
+
+</div>
+
+
+<script>
+
+    
+    // Character counter
+    const newsInput = document.getElementById("news");
+    const charCount = document.getElementById("charCount");
+
+    function updateCounter() {
+        charCount.textContent =
+            newsInput.value.length + " / 10000";
+    }
+
+    updateCounter();
+
+    newsInput.addEventListener("input", updateCounter);
+
+
+    // Clear button
+    document.getElementById("clearBtn").addEventListener("click", function() {
+        newsInput.value = "";
+        updateCounter();
+        newsInput.focus();
+    });
+
+
+    // Loading animation on submit
+    document.getElementById("newsForm").addEventListener("submit", function() {
+        const button = document.getElementById("analyzeBtn");
+
+        button.classList.add("loading");
+        button.querySelector("span:first-child").textContent =
+            "Analyzing...";
+    });
+
+
+    // Animated circular percentage gauges
+    document.querySelectorAll(".gauge").forEach(function(gauge) {
+
+        const value = Math.max(
+            0,
+            Math.min(100, parseFloat(gauge.dataset.value) || 0)
+        );
+
+        const circle = gauge.querySelector(".gauge-progress");
+        const number = gauge.querySelector(".gauge-number");
+
+        const radius = 50;
+        const circumference = 2 * Math.PI * radius;
+
+        circle.style.strokeDasharray = circumference;
+        circle.style.strokeDashoffset = circumference;
+        circle.style.stroke = gauge.dataset.color;
+
+        let startTime = null;
+        const duration = 1500;
+
+        function animate(timestamp) {
+
+            if (!startTime) startTime = timestamp;
+
+            const progress = Math.min(
+                (timestamp - startTime) / duration,
+                1
+            );
+
+            const eased = 1 - Math.pow(1 - progress, 3);
+
+            const currentValue = value * eased;
+
+            circle.style.strokeDashoffset =
+                circumference * (1 - currentValue / 100);
+
+            number.textContent = currentValue.toFixed(2) + "%";
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        requestAnimationFrame(animate);
+
+    });
+
+
+    // Smooth scroll to result after prediction
+    const resultPanel = document.getElementById("resultPanel");
+
+    if (resultPanel) {
+        setTimeout(function() {
+            resultPanel.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }, 250);
+    }
+
+</script>
+
+</body>
+</html>
